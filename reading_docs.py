@@ -1,7 +1,9 @@
 import jax.numpy as jnp
-import numpy as np
 import matplotlib.pyplot as plt
-from jax import jit
+from jax import jit, grad, random, jacobian
+
+# key to use with random
+key = random.key(64)
 
 x_jnp = jnp.linspace(0, 10, 1000)  # can use jax arrays and numpy arrays together
 y_jnp = 2 * jnp.sin(x_jnp) * jnp.cos(x_jnp)
@@ -28,5 +30,18 @@ def norm(x):
 
 norm_compiled = jit(norm)
 
-arr_to_norm = jnp.array(np.random.randint(10, 10000, 10))
+arr_to_norm = jnp.array(random.randint(key, 10, 10, 1000))
 print(norm_compiled(arr_to_norm))
+
+
+# derivatives, has autodiff with jax.grad
+def sum_logistic(x):
+    return jnp.sum(1.0 / (1.0 + jnp.exp(-x)))
+
+
+x_small = jnp.arange(3.0)
+derivative_fn = grad(sum_logistic)
+print(f"derivative is {derivative_fn(x_small)}")
+
+# can compute jacobian for vector val funcs
+print(f"jacobian is {jacobian(jnp.exp)(x_small)}")
